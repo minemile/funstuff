@@ -12,9 +12,9 @@ CREATE TABLE products(
 CREATE TABLE shops(
 	code CHAR(5) NOT NULL,
 	name VARCHAR(50) NOT NULL UNIQUE,
-	telephone varchar(25),
+	telephone VARCHAR(25),
 	[address] NVARCHAR(500),
-	/*CHECK(telephone IN (1-10, '+', '*', '#', '-', '(', ')', ' ') )*/
+	CHECK(telephone not LIKE '%[^0-9*+() ]%'),
 	CONSTRAINT prim_code PRIMARY KEY(code)
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE register_buy(
 	[count] SMALLINT NOT NULL,
 	price SMALLMONEY NOT NULL,
 	discount DECIMAL(4,2),
-	custumer VARCHAR(100)
+	custumer VARCHAR(100),
 	CONSTRAINT buy_id PRIMARY KEY(buy_id),
 	CONSTRAINT foreign_shop_code FOREIGN KEY(shops_code) REFERENCES shops(code),
 	CONSTRAINT foreign_prod_id FOREIGN KEY(prod_id) REFERENCES products(id)

@@ -1,27 +1,21 @@
 use URFU_TASKS;
-SELECT * FROM register_buy
-WHERE date_time<'20100801 00:00:00'
+--1
+SELECT * FROM register_buy r
+WHERE r.date_time<'20100801 00:00:00'
 
-SELECT name, date_time, custumer, [count]
-FROM register_buy r JOIN products p ON r.prod_id=p.id
-WHERE shops_code='1' AND date_time between convert(datetime, '2010-12-01',120) AND CONVERT(datetime, '2010-12-31',120)
+--2
+SELECT p.name, cast(rb.date_time as date), cast(rb.date_time as time), rb.custumer, rb.[count]
+FROM register_buy rb JOIN products p ON rb.prod_id=p.id
+WHERE rb.shops_code='1' and rb.date_time between '20101201 00:00:00' and '20101231 00:00:00'
 
-SELECT p.id,p.name,avg(r.discount),min(r.price),max(r.price)from register_buy r
-JOIN products p ON r.prod_id=p.id
-GROUP BY p.id, p.name
-ORDER BY p.name
+--3
+SELECT p.id, p.name, AVG(rb.discount), min(rb.price), max(rb.price)
+FROM register_buy rb JOIN products p ON rb.prod_id=p.id
+group by p.id, p.name
+order by p.name
 
-SELECT
-          z.name
-        , (SUM(CASE WHEN(c.end_work_hour>=c.start_work_hour
-                              ) THEN ((c.end_work_hour-start_work_hour)*60+ (c.end_work_minute-c.start_work_minute)) ELSE((24-c.start_work_hour+c.end_work_hour)*60+(c.end_work_minute-c.start_work_minute)) END))/60 as hours
-        , (SUM(CASE WHEN(c.end_work_minute>=c.start_work_minute
-                              ) THEN ((c.end_work_hour-start_work_hour)*60+ (c.end_work_minute-c.start_work_minute)) ELSE((c.end_work_hour-c.start_work_hour-1)*60+(c.end_work_minute-c.start_work_minute)) END))%60 as minutes
-FROM
-          shops z
-          JOIN
-                    schedule c
-          ON
-                    c.shops_code=z.code
-GROUP BY
-          z.name
+--4
+SELECT name, SUM(end_work_hour * 60 + end_work_minute - (start_work_hour * 60 + start_work_minute)) / 60,
+SUM(end_work_hour * 60 + end_work_minute - (start_work_hour * 60 + start_work_minute)) % 60
+FROM schedule s JOIN shops sh ON s.shops_code=sh.code
+group by name
