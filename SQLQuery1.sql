@@ -61,3 +61,41 @@ WHERE rb.shops_code=@shop_id
 GROUP BY pr.name;
 GO
 execute p4 @shop_id=1
+
+--5
+IF EXISTS ( SELECT * FROM dbo.sysobjects
+	WHERE id = object_id(N'p5') and objectproperty(id, N'isProcedure')=1
+)
+DROP PROCEDURE p5;
+GO
+
+CREATE PROC p5 @s_date DATETIME, @e_date DATETIME AS
+BEGIN
+DECLARE @best_cust VARCHAR(100);
+
+SET @best_cust = (
+SELECT top(1)
+CASE WHEN charindex(' ', custumer)>1 THEN substring(custumer, 1,charindex(' ', custumer))
+WHEN CHARINDEX('.', custumer)>1 THEN substring(custumer, 1,charindex('.', custumer))
+ELSE custumer
+end
+FROM register_buy rb
+WHERE date_time BETWEEN @s_date AND @e_date
+GROUP BY CASE WHEN charindex(' ', custumer)>1 THEN substring(custumer, 1,charindex(' ', custumer))
+WHEN CHARINDEX('.', custumer)>1 THEN substring(custumer, 1,charindex('.', custumer))
+ELSE custumer
+end
+ORDER BY SUM(([count] * price) * (1-discount/100)) DESC
+)
+
+SELECT @best_cust
+
+SELECT rb.prod_id, p.name, rb.shops_code, s.name, rb.[count],
+(rb.[count] * rb.price * (1 - rb.discount/100)) as [sj]
+FROM 
+register_buy rb JOIN products p ON rb.prod_id=p.id
+JOIN shops s ON rb.shops_code=s.code
+WHERE CHARINDEX(@best_cust, custumer)=1
+END
+GO
+execute p5 @s_date='01.01.2004', @e_date='01.01.2013'
