@@ -4,43 +4,30 @@ IF EXISTS ( SELECT * FROM dbo.sysobjects
 ) 
 DROP PROCEDURE p51;
 GO
-CREATE PROCEDURE p51 @code varchar(15), @year int, @month int as
-CREATE TABLE #month_per_day(day_month int null)
-	declare @day int;
-	declare @date datetime;
-	set @day=1;
-	set @date = convert (datetime, cast(@year as varchar) + right('0'+@month, 2) + '01');
-	select @date
-	while @month = month(@date)
-		begin
-			insert into #month_per_day values (@day)
-			set @day=@day+1
-			set @date = dateadd(day, 1, @date)
-		end
-SELECT * FROM #month_per_day
 
-SELECT t2.month_day, sum(case when t1.month_day <= t2.month_day then t1.[sum] else 0 end)
-from (
-	select day(rb.date_time) as month_day, sum((rb.[count] * rb.price) * (1-rb.discount/100)) as [sum]
-	FROM products p
-	JOIN register_buy rb ON p.id=rb.prod_id
-	WHERE p.id=@code and year(rb.date_time) = @year AND month(rb.date_time)=@month
-	GROUP BY rb.date_time) as t1
-	cross join (
-	select m.day_month as month_day
-	from #month_per_day as m) as t2
-	group by t2.month_day
+CREATE PROCEDURE p51 @prod_code int, @year int, @month int AS
+CREATE TABLE #days_per_month (
+  m_day DATE
+)
+
+DECLARE
+@s_date DATE;
+set @s_date = DATEFROMPARTS(@year, @month, 1)
+while @month = month(@s_date)
+	BEGIN
+	  INSERT INTO #days_per_month VALUES (@s_date)
+	  set @s_date = DATEADD(day, 1, @s_date)
+	END
+
+SELECT m_day, summa
+FROM #days_per_month dm LEFT JOIN
+(
+	SELECT date_time, sum(rb.[count] * rb.price * (1 - rb.discount/100)) as summa
+	FROM register_buy rb
+	WHERE rb.prod_id=@prod_code and year(rb.date_time)=@year and month(rb.date_time)=@month
+	GROUP BY date_time
+) as prod_sum
+ON dm.m_day = prod_sum.date_time
 GO
-execute p51 '01',2010,12
---2
 
---3
-select p.code, p.name, Av.avårage, rb.price
-from products p
-  inner join register_buy rb on rb.prod_id = p.id
-  inner join (select rb.prod_id, avg(rb.price) as avårage
-        from register_buy rb
-        group by rb.prod_id
-       ) as Av 
-	on rb.prod_id = Av.prod_id
-where rb.price < Av.avårage
+execute p51 7, 2010, 01;
