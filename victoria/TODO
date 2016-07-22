@@ -1,0 +1,21 @@
+TODO
+
+0. Put all these on GitHub.
+1. Make a server application to connect users even via NAT, implement a cleanup method to wipe users' IPs.
+	1.2  Auto proxy list changer (simple list parser).
+2. Implement encrypted file exchange (have to improve encryption/decryption algorithm to be able to process large files faster (multithreading?)).
+3. Make some keygen for x86 Windows using Intel's RnRand.
+4. Port the whole project to Windows (networking, truncate()).
+5. GUI frontend.
+6. Improve pad synchronization (CRC32 checksum and TCP "reliability" aren't enough, are they?").
+
+СДЕЛАТЬ
+
+0. Закинуть проект на гитхаб.
+1. Сделать серверное приложение для соединения пользователей даже через NAT, написать метод чистки пользовательских IP.
+	1.2 Автоматическая смена прокси (простой парсес списка).
+2. Ввести обмен шифрованными файлами (следует улучшить алгоритм шифрования, чтобы быстрее обрабатывать большие файлы (мультипоточность?)).
+3. Сделать генератор ключей для x86 Windows с помощью Intel'овского RnRand.
+4. Портировать весь проект на Windows (связь, truncate()).
+5. Графический интерфейс.
+6. Улучшить синхронизацию (хеша CRC23 и "надёжности" TCP явно маловато, так оно?).
